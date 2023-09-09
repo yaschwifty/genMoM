@@ -12,16 +12,11 @@ class GenMOM:
         try:
             r = sr.Recognizer()
             with sr.Microphone() as source2:
-                # wait for a second to let the recognizer
-                # adjust the energy threshold based on
-                # the surrounding noise level
                 r.adjust_for_ambient_noise(source2, duration=0.2)
                 print("Please start speaking...")
-                audio2 = r.listen(source2, 10, 60)
+                audio2 = r.listen(source2, 10, 60) # runs for 60s
                 print("Converting speech to text...")
-                # Using google to recognize audio
                 self.ip = r.recognize_google(audio2)
-                # MyText = MyText.lower()
                 print("Orignal: ", self.ip)
         except sr.RequestError as e:
             print("Could not request results; {0}".format(e))
@@ -29,16 +24,12 @@ class GenMOM:
             print("unknown error occurred")
 
     def summarizeWithBart(self):
-        # Load pre-trained BART model and tokenizer
         print("Summarising text...")
         model_name = 'facebook/bart-large-cnn'
         model = BartForConditionalGeneration.from_pretrained(model_name)
         tokenizer = BartTokenizer.from_pretrained(model_name)
-        # Tokenize and encode the input text
         inputs = tokenizer([self.ip], return_tensors='pt', max_length=1024, truncation=True)
-        # Generate summary
         summary_ids = model.generate(inputs.input_ids, num_beams=4, min_length=30, max_length=150, early_stopping=True)
-        # Decode the summary
         self.op = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
 
